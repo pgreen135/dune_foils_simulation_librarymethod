@@ -204,16 +204,13 @@ std::vector<double> LibraryAccess::PhotonLibraryAnalyzer(double _energy, const i
 	int total_hits_vuv = 0;
 	int total_hits_vis = 0;
 
-	// REMOVED DETECTION PROBABILITY ---- TIMINGS TESTING
 	for(int i = 0; i < int_hits_vuv; i++)
 	{
-		total_hits_vuv++;
-		//if(gRandom->Uniform(1.) <= vuvfrac*quantum_efficiency && gRandom->Uniform(1.) <= 0.5){total_hits_vuv++;}		// extra factor 1/2 due to only half vuv photons incident on TPB coated detector are detected, other half remitted in opposite direction - this is missing from library
+		if(gRandom->Uniform(1.) <= vuvfrac*quantum_efficiency && gRandom->Uniform(1.) <= 0.5){total_hits_vuv++;}		// extra factor 1/2 due to only half vuv photons incident on TPB coated detector are detected, other half remitted in opposite direction - this is missing from library
 	}
 	for(int j = 0; j < int_hits_vis; j++)
 	{
-		total_hits_vis++;
-		//if(gRandom->Uniform(1.) <= catcov*visfrac*quantum_efficiency){total_hits_vis++;}
+		if(gRandom->Uniform(1.) <= catcov*visfrac*quantum_efficiency){total_hits_vis++;}
 	}
   	
   	//Push information back into a vector to readout in libraryanalyze_light_histo

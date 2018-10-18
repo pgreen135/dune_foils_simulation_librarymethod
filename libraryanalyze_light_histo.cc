@@ -154,7 +154,7 @@ int main() {
     ////////////------------lOADING THE DESIRED OPTICAL LIBRARY------------------///////////
     ////////////////////////////////////////////////////////////////////////////////////////
     if(config == 0) {libraryfile = "dune_withfoils_lib_cleaned.root"; }
-    if(config == 1) {libraryfile = "library_file_x250cm_onaxis.root"; }          
+    if(config == 1) {libraryfile = "dune_withfoils_lib_cleaned.root"; }          
     if(config == 2) {libraryfile = "dune_withfoils_lib_cleaned.root"; }
     lar_light.LoadLibraryFromFile(libraryfile, reflected, reflT);
 
@@ -311,9 +311,8 @@ int main() {
 
             int num_pmt = pmt_loop;
 
-            // VOXEL CALLED CHANGED TO 0 for indv. event photons (always #0)
             // - This function (defined in library_access.cc) will determine how many VUV and Visble photons hit the given PMT
-            vector<double> pmt_hits = lar_light.PhotonLibraryAnalyzer(energy_list.at(events), scint_yield, quantum_efficiency, catcov, vuvfrac, visfrac, num_pmt, 0);//voxel_list.at(events));
+            vector<double> pmt_hits = lar_light.PhotonLibraryAnalyzer(energy_list.at(events), scint_yield, quantum_efficiency, catcov, vuvfrac, visfrac, num_pmt, voxel_list.at(events));
             // NB this vector has form: (no of VUV photons, no of visible photons)
 
             int num_VUV = pmt_hits.at(0);
@@ -372,9 +371,7 @@ int main() {
                     // the scintillation function timing is also converted to microseconds
                     // the time window offset is when the decay occured, given already in microseconds            
                     
-                    // CHANGED TIMING TESTING
-                    //total_time_vuv = (x*0.001+(decay_time_list.at(events) + fScintillation_function->GetRandom())*1000000.); // in microseconds 
-                    total_time_vuv = (x*0.001 + 0 + 0);
+                    total_time_vuv = (x*0.001+(decay_time_list.at(events) + fScintillation_function->GetRandom())*1000000.); // in microseconds 
 
                     // apply time cut if required
                     // 0.1 microseconds = 100 ns! 
@@ -409,8 +406,7 @@ int main() {
                     for(auto &y : transport_time_vis) { //looping through the transport_time_vis vector
                         
                         // CHANGED TIMING TESTING
-                        //total_time_vis = (y*0.001+(decay_time_list.at(events) + fScintillation_function->GetRandom())*1000000.); // in microseconds
-                        total_time_vis = (y*0.001+0);
+                        total_time_vis = (y*0.001+(decay_time_list.at(events) + fScintillation_function->GetRandom())*1000000.); // in microseconds
 
                         // apply time cut if required 
                         if(cut == true && total_time_vis > time_cut){ continue; } // go onto the next interation - cut has been made

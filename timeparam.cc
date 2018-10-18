@@ -239,11 +239,6 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
     for (int i=0; i < number_photons; i++){
         double rand = gRandom->Uniform(0.5,1);
         transport_time_vis[i] += (transport_time_vis[i]-fastest_time)*(exp(-tau*log(rand))-1);
-
-        // bug check
-        if (transport_time_vis[i] > 1e50){
-            cout << "Error: tau = " << tau << " rand = " << rand << "   x = " << x << endl;
-        }
     }    
     
     return transport_time_vis;
