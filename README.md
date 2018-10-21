@@ -1,4 +1,4 @@
-# makeDataFiles
+# dune_foils_simulation_librarymethod
 Low energy event light simulations in DUNE.
 
 Code capable of simulating the induced scintillation of low energy events (specifically supernova neutrinos, argon-39 beta decay and radon-222 alpha decay) occuring within the active volume of DUNE including TPB-coated wavelength-shifting reflector foils on the cathode.
