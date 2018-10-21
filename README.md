@@ -24,7 +24,7 @@ The code creates a root file with an event tree and data trees for all,vuv and v
 
 2. All of the main functionailty used to generate the .root files is found in "libraryanalyze_light_histo.cc". This is well commented and I would advise going through it slowly to understand how the trees are created/filled.
 
-3. timingparam.h and timingparam.cc contain the functions which determine the timing of the photons with the updated timing parameterisations + discretisation for efficiency. Visible light timings currently incomplete.
+3. timingparam.h and timingparam.cc contain the functions which determine the timing of the photons with the updated timing parameterisations + discretisation for efficiency. Visible light timings preliminary.
 
 4. utility_functions.cc contains the energy spectrum functions + the only timing parameterisation functions which are commented out.  
 
