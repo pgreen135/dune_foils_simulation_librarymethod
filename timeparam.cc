@@ -119,11 +119,8 @@ vector<double> timeparam::getVUVTime(double distance, int number_photons) {
     arrival_time_distrb.clear();
     arrival_time_distrb.reserve(number_photons);
 
-    // determine nearest parameterisation in discretisation
-    int index = std::round((distance - 50) / step_size);
-
-    // if distance < 50cm, i.e. index < 0
-    if (index < 0) {
+    // distance < 50cm
+    if (distance < 50) {
         // times are fixed shift i.e. direct path only
         double t_prop_correction = distance/vuv_vgroup_mean;
         for (int i = 0; i < number_photons; i++){
@@ -131,7 +128,9 @@ vector<double> timeparam::getVUVTime(double distance, int number_photons) {
         }
     }
     // distance >= 50cm
-    else {    
+    else {
+        // determine nearest parameterisation in discretisation
+        int index = std::round((distance - 50) / step_size);
         // check whether required parameterisation has been generated, generating if not
         if (VUV_timing[index].GetNdim() == 0) {
             generateparam(index);
@@ -155,9 +154,9 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
     TVector3 hotspot(0,0,0);
     TVector3 v_to_wall(0,0,0);
     
-    // distance to wall
+    // distance to wall    
     v_to_wall[0] = plane_depth - ScintPoint[0];
-    
+
     // hotspot is point on wall where TPB is activated most intensely by the scintillation
     hotspot = ScintPoint + v_to_wall;
     
@@ -178,7 +177,6 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
     vector<double> ReflTimes(number_photons,0);
     double v;
     for (int i=0; i<number_photons; i++) {
-        //v = gRandom->Gaus(vis_vmean,vis_vrms);
         ReflTimes[i] = Visdist/vis_vmean;
     }
 
@@ -191,12 +189,7 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
     // *************************************************************************************************
     // Smearing of arrival time distribution
     // *************************************************************************************************
-    
-    // TO DO:
-    //  1). Angular adjustments for tau --- required, but not clear pattern
-    //  2). Tau/width parameterisation for VUVdist<50 case + angular adjustments for tau/width -- generating some geant4 data to do this
-
-
+   
     // calculate fastest time possible
     // vis part
     double vis_time = Visdist/vis_vmean;
@@ -214,16 +207,24 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
     // sum
     double fastest_time = vis_time + vuv_time;
 
-    
-    // calculate smearing parameters
+    // calculate angle between reflection point and detection point
+    double delta_y = abs(bounce_point[1] - OpDetPoint[1]);
+    double delta_z = abs(bounce_point[2] - OpDetPoint[2]);
+    double delta = sqrt(pow(delta_y,2) + pow(delta_z,2));
+    double theta = atan(delta/plane_depth) * (180/pi); // in degrees
+
+    // calculate smearing parameters --- note: fits are preliminary -- especially for vuvdist < 50cm case
     double tau = 0;
     double width = 0;
     double x = 0;
     if (VUVdist < 50){
         // tau
-        tau = 10.0;
+        tau = 10.87 - 0.066*VUVdist;
         // gaussian width
-        width = 0.5;
+        // on axis
+        width = 0.055*VUVdist;
+        // angular correction
+        width += 0.5 + 1.5e-3*VUVdist*theta;
         // smear distribution with narrow half gaussian before applying exponential smearing
         for(int i=0; i < number_photons; i++){
             transport_time_vis[i] += abs(gRandom->Gaus(0,width));
@@ -231,13 +232,17 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
     }
     else {
         // tau
+        // get on-axis tau
         x = ScintPoint[0];   // drift distance (x)
         tau = 0.754 + 0.0239*x - 0.000176*pow(x,2) + 4.45e-7*pow(x,3);
+        // apply angular correction to tau
+        tau += 0.03 * (x/plane_depth) * theta;
+        tau=0;
     }
 
     // apply exponential smearing
     for (int i=0; i < number_photons; i++){
-        double rand = gRandom->Uniform(0.5,1);
+        double rand = gRandom->Uniform(0.5,1);        
         transport_time_vis[i] += (transport_time_vis[i]-fastest_time)*(exp(-tau*log(rand))-1);
     }    
     

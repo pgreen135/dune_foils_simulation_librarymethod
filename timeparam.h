@@ -66,6 +66,8 @@ private:
 	double c_LAr_VUV = 0.12;        		// m/s
 	double c_LAr_vis = 0.29979/n_LAr_vis; 	// m/s
 
+	double pi =  3.141592653589793;
+
 
 public:
 	// constructor
