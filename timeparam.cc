@@ -15,7 +15,7 @@ using namespace std;
 timeparam::timeparam(double size): step_size{size} {	
 	
     // create empty parameterisations array, parameterisations generated as they are required
-    int num_params = (d_max - 50) / step_size;  // for d < 50cm, no parameterisaton
+    int num_params = (d_max - 25) / step_size;  // for d < 25cm, no parameterisaton - delta function instead
 	// default TF1() constructor gives function with 0 dimensions, can then check numDim to see if parameterisation has been generated	
 	vector<TF1> VUV_timing_temp(num_params,TF1());
 	VUV_timing = VUV_timing_temp;
@@ -30,7 +30,7 @@ void timeparam::generateparam(int index) {
     gRandom->SetSeed(0);
 
     // get distance 
-    double distance_in_cm = (index * step_size) + 50;
+    double distance_in_cm = (index * step_size) + 25;
     
     // time range
     const double signal_t_range = 5000.;
@@ -87,15 +87,14 @@ void timeparam::generateparam(int index) {
     fVUVTiming->GetQuantiles(nq_max,yq_max,xq_max);
     double max = yq_max[0];
     // min
-    const int nq_min=1;
-    double xq_min[nq_min];
-    double yq_min[nq_min];    
-    xq_min[0] = 0.01;
-    fVUVTiming->GetQuantiles(nq_min,yq_min,xq_min);
-    double min = yq_min[0];
-    
+    double min = t_direct_min;
+
     // set the number of points used to sample parameterisation
-    int f_sampling = 1000;
+    // for shorter distances, peak is sharper so more sensitive sampling required - values could be optimised 
+    int f_sampling;
+    if (distance_in_cm < 50) { f_sampling = 10000; }
+    else if (distance_in_cm < 100){ f_sampling = 5000; }
+    else { f_sampling = 1000; }
     fVUVTiming->SetNpx(f_sampling);    
 
     // generate the sampling
@@ -119,18 +118,18 @@ vector<double> timeparam::getVUVTime(double distance, int number_photons) {
     arrival_time_distrb.clear();
     arrival_time_distrb.reserve(number_photons);
 
-    // distance < 50cm
-    if (distance < 50) {
+    // distance < 25cm
+    if (distance < 25) {
         // times are fixed shift i.e. direct path only
         double t_prop_correction = distance/vuv_vgroup_mean;
         for (int i = 0; i < number_photons; i++){
             arrival_time_distrb.push_back(t_prop_correction);
         }
     }
-    // distance >= 50cm
+    // distance >= 25cm
     else {
         // determine nearest parameterisation in discretisation
-        int index = std::round((distance - 50) / step_size);
+        int index = std::round((distance - 25) / step_size);
         // check whether required parameterisation has been generated, generating if not
         if (VUV_timing[index].GetNdim() == 0) {
             generateparam(index);
@@ -195,12 +194,12 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
     double vis_time = Visdist/vis_vmean;
     // vuv part
     double vuv_time;
-    if (VUVdist < 50){
+    if (VUVdist < 25){
         vuv_time = VUVdist/vuv_vgroup_mean;
     }
     else {
         // find index of required parameterisation
-        int index = std::round((VUVdist - 50) / step_size);
+        int index = std::round((VUVdist - 25) / step_size);
         // find shortest time
         double vuv_time = VUV_min[index];
     }
@@ -213,11 +212,11 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
     double delta = sqrt(pow(delta_y,2) + pow(delta_z,2));
     double theta = atan(delta/plane_depth) * (180/pi); // in degrees
 
-    // calculate smearing parameters --- note: fits are preliminary -- especially for vuvdist < 50cm case
+    // calculate smearing parameters --- note: fits are preliminary -- especially for vuvdist < 25cm case
     double tau = 0;
     double width = 0;
     double x = 0;
-    if (VUVdist < 50){
+    if (VUVdist < 25){
         // tau
         tau = 10.87 - 0.066*VUVdist;
         // gaussian width

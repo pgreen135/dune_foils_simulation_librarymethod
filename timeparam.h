@@ -23,8 +23,8 @@ private:
 	// *************************************************************************************************
 	// discretisation step size in cm, set in libraryanalyze_light_histo.h
 	double step_size;
-	// maximum distance in cm parameterisations are generated for
-	double d_max = 1500;
+	// maximum distance in cm parameterisations are generated for (only generated when required)
+	double d_max = 2500;
 	// vector containing generated VUV timing parameterisations
 	std::vector<TF1> VUV_timing;
 	// vector containing min and max range VUV timing parameterisations are sampled to
