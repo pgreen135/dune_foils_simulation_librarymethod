@@ -236,7 +236,6 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
         tau = 0.754 + 0.0239*x - 0.000176*pow(x,2) + 4.45e-7*pow(x,3);
         // apply angular correction to tau
         tau += 0.03 * (x/plane_depth) * theta;
-        tau=0;
     }
 
     // apply exponential smearing
