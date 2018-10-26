@@ -201,7 +201,7 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
         // find index of required parameterisation
         int index = std::round((VUVdist - 25) / step_size);
         // find shortest time
-        double vuv_time = VUV_min[index];
+        vuv_time = VUV_min[index];
     }
     // sum
     double fastest_time = vis_time + vuv_time;
