@@ -144,8 +144,7 @@ vector<double> timeparam::getVUVTime(double distance, int number_photons) {
 
 // vis arrival times calculation function
 vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, int number_photons) {
-    gRandom->SetSeed(0);
-
+    
     // calculate point of reflection for shortest path accounting for difference in refractive indicies    
     // vectors for storing results
     TVector3 image(0,0,0);
@@ -185,10 +184,13 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
         transport_time_vis[i] = VUVTimes[i] + ReflTimes[i];
     }
 
+
     // *************************************************************************************************
     // Smearing of arrival time distribution
     // *************************************************************************************************
    
+    gRandom->SetSeed(0);
+
     // calculate fastest time possible
     // vis part
     double vis_time = Visdist/vis_vmean;
@@ -206,43 +208,52 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
     // sum
     double fastest_time = vis_time + vuv_time;
 
-    // calculate angle between reflection point and detection point
-    double delta_y = abs(bounce_point[1] - OpDetPoint[1]);
-    double delta_z = abs(bounce_point[2] - OpDetPoint[2]);
-    double delta = sqrt(pow(delta_y,2) + pow(delta_z,2));
-    double theta = atan(delta/plane_depth) * (180/pi); // in degrees
+    // calculate angle between scintillation point and reflection point
+    double delta_y = abs(ScintPoint[1] - bounce_point[1]);
+    double delta_z = abs(ScintPoint[2] - bounce_point[2]);
+    double delta_r = sqrt(pow(delta_y,2) + pow(delta_z,2));
+    double theta = atan(delta_r/(plane_depth - ScintPoint[0])) * (180/3.1415);  //in degrees
 
-    // calculate smearing parameters --- note: fits are preliminary -- especially for vuvdist < 25cm case
-    double tau = 0;
-    double width = 0;
-    double x = 0;
-    if (VUVdist < 25){
-        // tau
-        tau = 10.87 - 0.066*VUVdist;
-        // gaussian width
-        // on axis
-        width = 0.055*VUVdist;
-        // angular correction
-        width += 0.5 + 1.5e-3*VUVdist*theta;
-        // smear distribution with narrow half gaussian before applying exponential smearing
-        for(int i=0; i < number_photons; i++){
-            transport_time_vis[i] += abs(gRandom->Gaus(0,width));
-        }
-    }
-    else {
-        // tau
-        // get on-axis tau
-        x = ScintPoint[0];   // drift distance (x)
-        tau = 0.754 + 0.0239*x - 0.000176*pow(x,2) + 4.45e-7*pow(x,3);
-        // apply angular correction to tau
-        tau += 0.03 * (x/plane_depth) * theta;
-    }
+    // calculate smearing parameters: 
+    //  1). tau = exponential smearing factor
+    //  2). delta = angular correction to range of random numbers generated, increases smearing as angle increases
+    //  3). cutoff = largest smeared time allowed, preventing excessively large times caused by exponential
+    double distance_cathode_plane = std::abs(plane_depth - ScintPoint[0]);
+    double tau = 12.300 - 0.1144*distance_cathode_plane + 0.0004546*pow(distance_cathode_plane,2) - 6.1954e-7*pow(distance_cathode_plane,3);
+    double delta = (0.003168 + 5.1967e-6*distance_cathode_plane + 2.205e-8*pow(distance_cathode_plane,2))*theta;
+    double cutoff = 227.188 + 1.3925*distance_cathode_plane - 0.001521*pow(distance_cathode_plane,2);
 
-    // apply exponential smearing
+    // apply smearing:
     for (int i=0; i < number_photons; i++){
-        double rand = gRandom->Uniform(0.5,1);        
-        transport_time_vis[i] += (transport_time_vis[i]-fastest_time)*(exp(-tau*log(rand))-1);
-    }    
+        double arrival_time = transport_time_vis[i];
+        double arrival_time_smeared;
+        // if time is already greater than cutoff or minimum smeared time would be greater than cutoff, do not apply smearing
+        if (arrival_time + (arrival_time-fastest_time)*(exp(-tau*log(1.0-delta))-1) >= cutoff) {
+            arrival_time_smeared = arrival_time;
+        }
+        // otherwise smear
+        else {
+            int counter = 0;
+            // loop until time generated is within cutoff limit
+            // most are within single attempt, very few take more than two, but this method could be made more efficient
+            do {
+                // don't attempt smearings too many times for cases near cutoff (very few cases)
+                if (counter >= 10){
+                    arrival_time_smeared = arrival_time; // don't smear
+                    break;
+                }
+                else {
+                    // generate random number in appropriate range            
+                    double x = gRandom->Uniform(0.5,1.0 - delta);
+                    // apply the exponential smearing
+                    arrival_time_smeared = arrival_time + (arrival_time-fastest_time)*(exp(-tau*log(x))-1);
+                }
+                // increment counter
+                counter++;
+            }   while (arrival_time_smeared > cutoff);
+        }
+        transport_time_vis[i] = arrival_time_smeared;
+    }  
     
     return transport_time_vis;
 }
