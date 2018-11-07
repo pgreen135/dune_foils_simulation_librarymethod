@@ -18,22 +18,6 @@ namespace utility{
     double Rn_function(double *x, double *par);
     double Scintillation_function(double *t, double *par);
     
-    /* Not currently in use
-    std::vector<double> GetVUVTime(double distance, int number_photons);
-    std::vector<double> GetVisibleTimeOnlyCathode(double t0, int number_photons);
-    std::vector<double> GetVisibleTimeFullConfig1(double t0, double tmean, double distance, int number_photons);
-    std::vector<double> GetVisibleTimeFullConfig2(double t0, double tmean, double distance, int number_photons);
-    double TimingParamReflected(TVector3 ScintPoint, TVector3 OpDetPoint );
-    std::vector<double> TimingParamReflected2(TVector3 ScintPoint, TVector3 OpDetPoint );
-    double finter_d(double *x, double *par);
-    double LandauPlusExpoFinal(double *x, double *par);
-    double finter_r(double *x, double *par);
-    double LandauPlusLandauFinal(double *x, double *par);
-    TVector3 GetShortestPathPoint(TVector3 ScintPoint, TVector3 OpDetPoint);
-    TVector3 GetShortestPathPoint_2(TVector3 ScintPoint, TVector3 OpDetPoint);
-    std::vector<double> GetReflTime(double distance, int number_photons);
-    std::vector<double> GetVisTime0thOrder(TVector3 ScintPoint, TVector3 OpDetPoint, int number_photons);
-    */
   }
 
 #endif

@@ -39,9 +39,9 @@ bool sort_function(std::pair<double, int> pair1, std::pair<double, int> pair2)
 ///-------------------------------------
 //--------WHAT to generate?-------------
 ///-------------------------------------
-bool fixed_energy = false; double fixedE = 20.0; //MeV
+bool fixed_energy = true; double fixedE = 20.0; //MeV
 bool supernova = false;
-bool solar = true;
+bool solar = false;
 bool gen_argon = false;
 bool gen_radon = false;
 ///-------------------------------------
@@ -54,11 +54,11 @@ double step_size = 1.0; 	// step size for discretisation of timing array in cm
 //--------WHERE to generate?-------------
 ///-------------------------------------
 // Choose one only!
-bool random_pos = true;	// works
+bool random_pos = false;	// works
 double PosMin[3] = {10,-600,300}; 	//For random_pos option, generate in this range
 double PosMax[3] = {330,600,1000};
 bool fixed_xpos = false; 	// needs updating, range getting random position from is not valid for dune library
-bool fixed_pos = false;		// works
+bool fixed_pos = true;		// works
 double fixedX = 250; 		// cm 
 double fixedY = 31.1784; 	// cm 
 double fixedZ = 580.099; 	// cm
@@ -179,7 +179,7 @@ const double time_frames = time_window/0.0012;
 //----Number of Events------------------
 ///-------------------------------------
 // Fixed energy (electron like) events:
-const int max_events_FE = 100000;
+const int max_events_FE = 1000;
 
 // Ar-39 events:
 //const int max_events_Ar = 10;

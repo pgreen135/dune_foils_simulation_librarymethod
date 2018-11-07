@@ -24,10 +24,10 @@ int main() {
     //////////////////////////////////////////////////////////////////////////////
     TF1 *fSpectrum = new TF1("fSpectrum",utility::SpectrumFunction,0,Q_Ar,1);//-----Beta decay spectrum
     TF1 *flandau_sn = new TF1("flandau_sn",utility::fsn, 0, 50, 1);//--SN Nu spectrum
-    TF1 *flandau_so = new TF1("flandau_so",utility::fso, 0, 50, 1);
+    TF1 *flandau_so = new TF1("flandau_so",utility::fso, 0, 50, 1); // Solar neutrino spectrum
     fSpectrum->SetParameter(0, Q_Ar);
     flandau_sn->SetParameter(0, Eav);
-    flandau_so->SetParameter(0, Eav);//For solar nuetrino
+    flandau_so->SetParameter(0, Eav);
 
     TRandom3 *fGauss = new TRandom3();
     
@@ -223,7 +223,7 @@ int main() {
         if(fixed_energy == true) {energy = fixedE;} 
         if(gen_argon == true) {energy = fSpectrum->GetRandom();}    // pull from the Ar beta spectrum (see utility_functions.cc)
         if(supernova == true) {energy = flandau_sn->GetRandom();}   // Pull from the predicted SN spectrum (see utility_functions.cc)
-        if(solar == true) {energy = flandau_so->GetRandom(0,17);}
+        if(solar == true) {energy = flandau_so->GetRandom(0,17);}	// pull from predicted solar neutrino spectrum
         if(gen_radon == true) {energy = fGauss->Gaus(Q_Rn, 0.05);}  // Gaus(av,sigma) - is a ROOT function, pulls from a Gaussian
          
 
@@ -460,7 +460,7 @@ int main() {
     // display time taken - for debugging purposes
     t_all_f = std::chrono::steady_clock::now();
     timespan_all = chrono::duration_cast<chrono::duration<double>>(t_all_f-t_all_i);
-    cout << "Total data tree filling too " << timespan_all.count() << " seconds\n";
+    cout << "Total data tree filling took " << timespan_all.count() << " seconds\n";
     cout << "Direct light timings calculation took " << timespan_VUV.count() << " seconds in total\n";
     cout << "Reflected light timings calculation took " << timespan_Refl.count() << " seconds in total\n";
     
