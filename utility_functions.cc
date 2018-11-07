@@ -72,12 +72,11 @@ double utility::fso(double *x, double *par)
         double E = *x;
         double Eav = par[0];
 
-        double f_nu = -0.00146609+0.00589747*E+0.0108878*std::pow(E,2)-0.00174571*std::pow(E,3)+4.97905e-05*std::pow(E,4)+3.15376e-06*std::pow(E,5)-1.37052e-07*std::pow(E,6);//We all know it's not true
+        double f_nu = -0.00146609+0.00589747*E+0.0108878*std::pow(E,2)-0.00174571*std::pow(E,3)+4.97905e-05*std::pow(E,4)+3.15376e-06*std::pow(E,5)-1.37052e-07*std::pow(E,6);//pol6 fit with chi square = 0.00013515
 
         return f_nu;
 
 }
-
 
 //Radon-222 decay energy spectrum (Gaussian about the alpha decay energy)
 
