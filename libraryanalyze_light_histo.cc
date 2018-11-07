@@ -379,7 +379,6 @@ int main() {
                     // x is the transport time (in NANOSECONDS) - x * 0.001 converts from ns -> micros_s
                     // the scintillation function timing is also converted to microseconds
                     // the time window offset is when the decay occured, given already in microseconds            
-                    
                     total_time_vuv = (x*0.001+(decay_time_list.at(events) + fScintillation_function->GetRandom())*1000000.); // in microseconds 
 
                     // apply time cut if required
@@ -413,8 +412,8 @@ int main() {
                     // calculate the total time
                     double total_time_vis;
                     for(auto &y : transport_time_vis) { //looping through the transport_time_vis vector
-                        
-                        // CHANGED TIMING TESTING
+
+                    	// as with VUV times, calculate total time
                         total_time_vis = (y*0.001+(decay_time_list.at(events) + fScintillation_function->GetRandom())*1000000.); // in microseconds
 
                         // apply time cut if required 
