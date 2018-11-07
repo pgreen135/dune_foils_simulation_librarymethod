@@ -24,15 +24,17 @@ int main() {
     //////////////////////////////////////////////////////////////////////////////
     TF1 *fSpectrum = new TF1("fSpectrum",utility::SpectrumFunction,0,Q_Ar,1);//-----Beta decay spectrum
     TF1 *flandau_sn = new TF1("flandau_sn",utility::fsn, 0, 50, 1);//--SN Nu spectrum
+    TF1 *flandau_so = new TF1("flandau_so",utility::fso, 0, 50, 1);
     fSpectrum->SetParameter(0, Q_Ar);
     flandau_sn->SetParameter(0, Eav);
+    flandau_so->SetParameter(0, Eav);//For solar nuetrino
 
     TRandom3 *fGauss = new TRandom3();
     
     TF1 *fScintillation_function = new TF1("Scintillation Timing", utility::Scintillation_function, 0, scint_time_window, 3); 
     fScintillation_function->SetParameter(0, t_singlet); 
     fScintillation_function->SetParameter(1, t_triplet);    // t_singlet and t_triplet are defined in the header file (libraryanalyze_light_histo.h)
-    if(gen_argon == true || fixed_energy == true || supernova == true){ //i.e. an electron is the ionising particle
+    if(gen_argon == true || fixed_energy == true || supernova == true || solar == true){ //i.e. an electron is the ionising particle
         fScintillation_function->FixParameter(2, 0); 
     }
     if(gen_radon == true){fScintillation_function->FixParameter(2, 1);} // i.e. an alpha particle is the ionising particle
@@ -68,6 +70,12 @@ int main() {
         scint_yield = scint_yield_electron;
         particle = "electron";
         cout << "\nGenerating " << max_events << ", supernova events.\n";
+    }
+    if(solar == true){
+        max_events = max_events_SO;
+        scint_yield = scint_yield_electron;
+        particle = "electron";
+        cout << "\nGenerating " << max_events << ", solar events.\n";
     }
     if(gen_radon == true){ //gen_radon == true
         max_events = max_events_Rn;
@@ -215,6 +223,7 @@ int main() {
         if(fixed_energy == true) {energy = fixedE;} 
         if(gen_argon == true) {energy = fSpectrum->GetRandom();}    // pull from the Ar beta spectrum (see utility_functions.cc)
         if(supernova == true) {energy = flandau_sn->GetRandom();}   // Pull from the predicted SN spectrum (see utility_functions.cc)
+        if(solar == true) {energy = flandau_so->GetRandom(0,17);}
         if(gen_radon == true) {energy = fGauss->Gaus(Q_Rn, 0.05);}  // Gaus(av,sigma) - is a ROOT function, pulls from a Gaussian
          
 
