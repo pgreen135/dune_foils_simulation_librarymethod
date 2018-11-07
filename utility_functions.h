@@ -14,6 +14,7 @@ namespace utility{
     int poisson(double mean, double draw, double eng);
     double SpectrumFunction(double *x, double *par);
     double fsn(double *x, double *par);
+    double fso(double *x, double *par);
     double Rn_function(double *x, double *par);
     double Scintillation_function(double *t, double *par);
     

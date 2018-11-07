@@ -39,9 +39,10 @@ bool sort_function(std::pair<double, int> pair1, std::pair<double, int> pair2)
 ///-------------------------------------
 //--------WHAT to generate?-------------
 ///-------------------------------------
-bool fixed_energy = true; double fixedE = 4.17; //MeV
+bool fixed_energy = false; double fixedE = 4.17; //MeV
 bool supernova = false;
-bool gen_argon = false;
+bool solar = true;//IDK anything anyway
+bool gen_argon = false;//false;
 bool gen_radon = false;
 ///-------------------------------------
 ///-------------------------------------
@@ -191,9 +192,12 @@ const int max_events_Rn = 1;
 const double Rn_decays_per_sec = activity_Rn* mass/2; // decay rate in one TPC
 
 // Supernova events:
-const int max_events_SN = 1;
+const int max_events_SN = 1000;
 //int max_events_SN = utility::poisson(expected_sn,gRandom->Uniform(1.),1.);
 
+// Solar neutrino events:
+const int max_events_SO = 5000;
+// //int max_events_SO = utility::poisson(expected_sn,gRandom->Uniform(1.),1.);
 
 //--------------------------------------
 //--------------------------------------
