@@ -39,8 +39,8 @@ bool sort_function(std::pair<double, int> pair1, std::pair<double, int> pair2)
 ///-------------------------------------
 //--------WHAT to generate?-------------
 ///-------------------------------------
-bool fixed_energy = true; double fixedE = 20.0; //MeV
-bool supernova = false;
+bool fixed_energy = false; double fixedE = 20.0; //MeV
+bool supernova = true;
 bool solar = false;
 bool gen_argon = false;
 bool gen_radon = false;
@@ -54,9 +54,9 @@ double step_size = 1.0; 	// step size for discretisation of timing array in cm
 //--------WHERE to generate?-------------
 ///-------------------------------------
 // Choose one only!
-bool random_pos = true;
+bool random_pos = false;
 bool fixed_xpos = false; 	// needs updating, range getting random position from is not valid for dune library
-bool fixed_yz_pos = false;
+bool fixed_yz_pos = true;
 bool fixed_pos = false;	
 
 double PosMin[3] = {10.,-600,0.}; 	//For random_pos option, generate in this range
