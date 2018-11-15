@@ -24,7 +24,7 @@ int main() {
     //////////////////////////////////////////////////////////////////////////////
     TF1 *fSpectrum = new TF1("fSpectrum",utility::SpectrumFunction,0,Q_Ar,1);//-----Beta decay spectrum
     TF1 *flandau_sn = new TF1("flandau_sn",utility::fsn, 0, 50, 1);//--SN Nu spectrum
-    TF1 *flandau_so = new TF1("flandau_so",utility::fso, 0, 50, 1); // Solar neutrino spectrum
+    TF1 *flandau_so = new TF1("flandau_so",utility::fso, 0.2, 14.22, 1); // solar neutrino spectrum
     fSpectrum->SetParameter(0, Q_Ar);
     flandau_sn->SetParameter(0, Eav);
     flandau_so->SetParameter(0, Eav);
@@ -222,8 +222,8 @@ int main() {
         double energy;
         if(fixed_energy == true) {energy = fixedE;} 
         if(gen_argon == true) {energy = fSpectrum->GetRandom();}    // pull from the Ar beta spectrum (see utility_functions.cc)
-        if(supernova == true) {energy = flandau_sn->GetRandom();}   // Pull from the predicted SN spectrum (see utility_functions.cc)
-        if(solar == true) {energy = flandau_so->GetRandom(0,17);}	// pull from predicted solar neutrino spectrum
+        if(supernova == true) {energy = flandau_sn->GetRandom();}   // pull from the predicted SN spectrum (see utility_functions.cc)
+        if(solar == true) {energy = flandau_so->GetRandom();}		// pull from solar neutrino spectrum
         if(gen_radon == true) {energy = fGauss->Gaus(Q_Rn, 0.05);}  // Gaus(av,sigma) - is a ROOT function, pulls from a Gaussian
          
 
