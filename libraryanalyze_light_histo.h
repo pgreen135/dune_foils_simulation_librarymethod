@@ -39,8 +39,8 @@ bool sort_function(std::pair<double, int> pair1, std::pair<double, int> pair2)
 ///-------------------------------------
 //--------WHAT to generate?-------------
 ///-------------------------------------
-bool fixed_energy = true; double fixedE = 20.0; //MeV
-bool supernova = false;
+bool fixed_energy = false; double fixedE = 20.0; //MeV
+bool supernova = true;
 bool solar = false;
 bool gen_argon = false;
 bool gen_radon = false;
@@ -54,14 +54,20 @@ double step_size = 1.0; 	// step size for discretisation of timing array in cm
 //--------WHERE to generate?-------------
 ///-------------------------------------
 // Choose one only!
-bool random_pos = false;	// works
-double PosMin[3] = {10,-600,300}; 	//For random_pos option, generate in this range
-double PosMax[3] = {330,600,1000};
+bool random_pos = false;
 bool fixed_xpos = false; 	// needs updating, range getting random position from is not valid for dune library
-bool fixed_pos = true;		// works
-double fixedX = 250; 		// cm 
-double fixedY = 31.1784; 	// cm 
-double fixedZ = 580.099; 	// cm
+bool fixed_yz_pos = true;
+bool fixed_pos = false;	
+
+double PosMin[3] = {10.,-600,0.}; 	//For random_pos option, generate in this range
+double PosMax[3] = {363.,600,1400};
+// Middle of the detector
+double fixedX = (PosMax[0]+PosMin[0]) / 2; 	// cm 
+double fixedY = (PosMax[1]+PosMin[1]) / 2; 	// cm 
+double fixedZ = (PosMax[2]+PosMin[2]) / 2; 	// cm
+
+
+
 
 
 ///-------------------------------------
@@ -93,7 +99,7 @@ bool reflT;
 //--------------------------------------
 //TTree branches and data products:
 //-------------------------------------
-TFile event_file("event_file_testing.root", "RECREATE", "Event File");
+TFile event_file("event_file_SN_tw2.5_centred.root", "RECREATE", "Event File");
 
 TTree *data_tree = new TTree("data_tree", "data tree");
 TTree *data_tree_vuv = new TTree("data_tree_vuv", "data tree_vuv");
@@ -130,6 +136,8 @@ double event_x_pos;
 double event_y_pos;
 double event_z_pos;
 double event_E;
+double event_decay_time;
+
 //--------------------------------------
 
 ///-------------------------------------
@@ -166,13 +174,17 @@ const double Q_Rn = 5.590; 				// deposited energy from a radon decay - Rn-222 -
 //----TPC and PMT properties---------------------
 ///-------------------------------------
 // QE of Arapucas, mesh efficiency  + /0.46 to remove bar attenuation factor included in library
-const double quantum_efficiency = 0.01*0.7; //0.46; 		
+const double quantum_efficiency = 0.01*0.7/0.46; 		
 const double catcov = 0.8; 	// proportion of cathode covered by TPB
-const double vuvfrac = 0.4;
-const double visfrac = 1.; 	// inclusive mode for now
-const double mass = 112000.; //SBND 112ton LAr
-const double time_window = 10.; //(0.0012 * 10.);//1.2 [ms] is the readout window.
-const double time_frames = time_window/0.0012;
+const double vuvfrac = 0.5;
+const double visfrac = (1-vuvfrac) + 0.8*vuvfrac; 	// rest of PMTs (1-vuvfrac) sensitive to vis light + account for TPB covered PMTs' ability to
+
+const double mass = 0.001396*(PosMax[0]-PosMin[0])*(PosMax[1]-PosMin[1])*(PosMax[2]-PosMin[2]); // density = 1.396 g/cm^3
+
+const double frame_time = 0.0025; // 2.5 miliseconds; equivalent to the drift time of electrons in DUNE
+const double time_window = 2.5; //readout window (running time of the simulation in seconds)
+const double time_frames = int(time_window/frame_time); // number of frames registered
+
 ///-------------------------------------
 
 ///-------------------------------------
@@ -183,16 +195,16 @@ const int max_events_FE = 1000;
 
 // Ar-39 events:
 //const int max_events_Ar = 10;
-const int max_events_Ar = activity_Ar * mass/2 * time_window;//Half volume for 1 TPC
-const int Ar_decays_per_sec = activity_Ar* mass/2; // decay rate in one TPC
+const int max_events_Ar = activity_Ar * mass * time_window;//Half volume for 1 TPC
+const int Ar_decays_per_sec = activity_Ar* mass; // decay rate in one TPC
 
 // Radon events:
 const int max_events_Rn = 1;
-//const int max_events_Rn = activity_Rn * mass/2 * time_window;//Half volume for 1 (NOTE: for a small time window, this will probably return 0)
-const double Rn_decays_per_sec = activity_Rn* mass/2; // decay rate in one TPC
+//const int max_events_Rn = activity_Rn * mass * time_window;//Half volume for 1 (NOTE: for a small time window, this will probably return 0)
+const double Rn_decays_per_sec = activity_Rn* mass; // decay rate in one TPC
 
 // Supernova events:
-const int max_events_SN = 1;
+const int max_events_SN = time_frames;
 //int max_events_SN = utility::poisson(expected_sn,gRandom->Uniform(1.),1.);
 
 // Solar neutrino events:

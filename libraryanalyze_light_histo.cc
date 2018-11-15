@@ -156,6 +156,8 @@ int main() {
     event_tree->Branch("event_y_pos", &event_y_pos, "event_y_pos/D");
     event_tree->Branch("event_z_pos", &event_z_pos, "event_z_pos/D");
     event_tree->Branch("event_E", &event_E, "event_E/D");
+    // add a branch for the decay time of the event
+    event_tree->Branch("event_decay_time", &event_decay_time, "event_decay_time/D");
 
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -244,6 +246,12 @@ int main() {
             double randomZ = (rand() % 500) + 0.5;          // random Z voxel
             position[0] = fixedX; position[1]= randomY; position[2] = randomZ; // fill the array
         }
+        else if(fixed_yz_pos == true) {
+        	// only need to generate random x
+        	position[0] = gRandom->Uniform(PosMin[0],PosMax[0]);
+        	position[1] = fixedY;
+        	position[2] = fixedZ;
+        }
         else { // fixed_pos == true
         position[0] = fixedX; position[1]= fixedY; position[2] = fixedZ;
         }
@@ -257,11 +265,22 @@ int main() {
         energy_list.push_back(energy); // push back the energy of the event onto the array
 
 
+	double decay_time = 0.;
         if (do_timings) {
-        //double decay_time = time_window * gRandom->Uniform(1.); // selects a random time of the event to decay within the specified time window
-             double decay_time = 0; // all decays happen at t = 0 (obviously this is not realistic)
-             decay_time_list.push_back(decay_time);
-        }
+	     if(supernova == true ){
+		// generate one event in each frame time
+		//decay_time = frame_time * (event + gRandom->Uniform(0,1)); // Generate SN event at a random position //gRandom->Uniform(0,frame_time);
+		
+		// Generate event in the middle of the time frame
+		decay_time = frame_time * (event + 0.5);
+		}
+	     // if event is a background decay->spread it over the time window
+	     else{
+		decay_time =  gRandom->Uniform(0,time_window); // selects a random time of the event to decay within the specified time window
+		
+		}
+	     decay_time_list.push_back(decay_time); 
+	}
 
         //////////////////////////////
         ///// Fill the event tree ////
@@ -272,6 +291,7 @@ int main() {
         event_y_pos = position[1];
         event_z_pos = position[2];
         event_E = energy_list.at(event); // pull from the energy list at the current iteration
+        event_decay_time = decay_time * 1000000;
         event_tree->Fill();
 
     } // end of event loop 
