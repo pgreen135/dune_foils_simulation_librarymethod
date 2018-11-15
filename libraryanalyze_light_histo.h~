@@ -54,9 +54,9 @@ double step_size = 1.0; 	// step size for discretisation of timing array in cm
 //--------WHERE to generate?-------------
 ///-------------------------------------
 // Choose one only!
-bool random_pos = true;
+bool random_pos = false;
 bool fixed_xpos = false; 	// needs updating, range getting random position from is not valid for dune library
-bool fixed_yz_pos = false;
+bool fixed_yz_pos = true;
 bool fixed_pos = false;	
 
 double PosMin[3] = {10.,-600,0.}; 	//For random_pos option, generate in this range
