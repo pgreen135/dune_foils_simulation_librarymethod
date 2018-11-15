@@ -39,8 +39,8 @@ bool sort_function(std::pair<double, int> pair1, std::pair<double, int> pair2)
 ///-------------------------------------
 //--------WHAT to generate?-------------
 ///-------------------------------------
-bool fixed_energy = false; double fixedE = 20.0; //MeV
-bool supernova = true;
+bool fixed_energy = true; double fixedE = 20.0; //MeV
+bool supernova = false;
 bool solar = false;
 bool gen_argon = false;
 bool gen_radon = false;
