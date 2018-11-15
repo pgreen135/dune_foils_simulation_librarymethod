@@ -14,12 +14,14 @@ using namespace std;
 // constructor
 timeparam::timeparam(double size): step_size{size} {	
 	
-    // create empty parameterisations array, parameterisations generated as they are required
-    int num_params = (d_max - 25) / step_size;  // for d < 25cm, no parameterisaton - delta function instead
-	// default TF1() constructor gives function with 0 dimensions, can then check numDim to see if parameterisation has been generated	
-	vector<TF1> VUV_timing_temp(num_params,TF1());
+    // create vector of empty TF1s that will be replaces with the parameterisations that are generated as they are required
+    // default TF1() constructor gives function with 0 dimensions, can then check numDim to qucikly see if a parameterisation has been generated  
+    int num_params = (d_max - 25) / step_size;  // for d < 25cm, no parameterisaton, a delta function is used instead	
+    vector<TF1> VUV_timing_temp(num_params,TF1());
 	VUV_timing = VUV_timing_temp;
+    
     // initialise vectors to contain range parameterisations sampled to in each case
+    // when using TF1->GetRandom(xmin,xmax), must be in same range otherwise sampling is regenerated, this is the slow part!
     vector<double> VUV_empty(num_params, 0);
     VUV_max = VUV_empty;
     VUV_min = VUV_empty;
@@ -83,14 +85,14 @@ void timeparam::generateparam(int index) {
     const int nq_max=1;
     double xq_max[nq_max];
     double yq_max[nq_max];    
-    xq_max[0] = 0.99;
+    xq_max[0] = 0.99;   // include 99%, 95% cuts out a lot of tail and time difference is negligible extending this
     fVUVTiming->GetQuantiles(nq_max,yq_max,xq_max);
     double max = yq_max[0];
     // min
     double min = t_direct_min;
 
     // set the number of points used to sample parameterisation
-    // for shorter distances, peak is sharper so more sensitive sampling required - values could be optimised 
+    // for shorter distances, peak is sharper so more sensitive sampling required - values could be optimised, but since these are only generate once difference is not significant
     int f_sampling;
     if (distance_in_cm < 50) { f_sampling = 10000; }
     else if (distance_in_cm < 100){ f_sampling = 5000; }
@@ -99,7 +101,7 @@ void timeparam::generateparam(int index) {
 
     // generate the sampling
     // the first call of GetRandom generates the timing sampling and stores it in the TF1 object, this is the slow part
-    // all subsequent calls check if it has been generated previously and are quick
+    // all subsequent calls check if it has been generated previously and are ~100+ times quicker
     double arrival_time = fVUVTiming->GetRandom(min,max);
     // add timing to the vector of timings and range to vectors of ranges
     VUV_timing[index] = *fVUVTiming;
@@ -144,7 +146,10 @@ vector<double> timeparam::getVUVTime(double distance, int number_photons) {
 
 // vis arrival times calculation function
 vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, int number_photons) {
-    
+    // *************************************************************************************************
+    // Calculation of earliest arrival times and corresponding unsmeared distribution
+    // *************************************************************************************************
+
     // calculate point of reflection for shortest path accounting for difference in refractive indicies    
     // vectors for storing results
     TVector3 image(0,0,0);
@@ -235,9 +240,9 @@ vector<double> timeparam::getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, i
         else {
             int counter = 0;
             // loop until time generated is within cutoff limit
-            // most are within single attempt, very few take more than two, but this method could be made more efficient
+            // most are within single attempt, very few take more than two -- could be made more efficient, some way of avoiding sluggish do-while loop
             do {
-                // don't attempt smearings too many times for cases near cutoff (very few cases)
+                // don't attempt smearings too many times for cases near cutoff (very few cases, not smearing these makes negigible difference)
                 if (counter >= 10){
                     arrival_time_smeared = arrival_time; // don't smear
                     break;

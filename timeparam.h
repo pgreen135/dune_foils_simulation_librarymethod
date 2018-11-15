@@ -1,19 +1,26 @@
 #ifndef TIMEPARAM_H
 #define TIMEPARAM_H
 
-// class containing imformation required for VUV timings parameterisation
-// builds array of parameterisations for pre-determined distances
-// calculates and returns the VUV transport time distribution using pre-built array of parameterisations
+// class containing information required for VUV and visible timings parameterisation
+/*
+VUV:
+   	landau + exponential parameterisation of VUV photon arrival times
+	The initial sampling of generated parameterisations to allow drawing random numbers from the distribution is slow. To improve efficiency, the parameterisations
+	are discretised in distance allowing each generated and sampled parameterisation to be stored in a vector so they to be used whenever subsequently required
+	without the need for regenerating. With 1cm step sizes in the discretisation this method is of order 100 times faster than original method, and the discrepancy
+	created is on sub-nanosecond scale. 
 
-// also contains function calculating vis light transport times
-// calculates shortest path considering refractive indices of each component in LAr
-// uses smearing of VUV parameterisation distribution to approximate the vis transport time distribution
+VIS:
+	The shortest path for the reflected is calculated considering refractive indices of each component in LAr giving the earliest arrival time.
+	The distribution of the arrival times is taken initially as the distribution of the VUV arrival times to the cathode plane, then these are smeared relative to
+	the fastest arrival time with an exponential distribution. This leaves the fastest arrival time unchanged and approximates the overall distribution in the 
+	visible light arrival times seen in full simulation. 
+*/	
 
 #include <vector>
 
 #include "TF1.h"
 #include "TVector3.h"
-
 
 class timeparam {
 
@@ -23,7 +30,7 @@ private:
 	// *************************************************************************************************
 	// discretisation step size in cm, set in libraryanalyze_light_histo.h
 	double step_size;
-	// maximum distance in cm parameterisations are generated for (only generated when required)
+	// maximum distance in cm parameterisations are generated for (only generated when required to prevent long initial loading time)
 	double d_max = 2500;
 	// vector containing generated VUV timing parameterisations
 	std::vector<TF1> VUV_timing;
@@ -77,12 +84,15 @@ public:
 	~timeparam(){std::cout << "Deleting timing parameterisations.\n";};
 
 	// parameterisation generation function
+	// generates TF1 and samples within required range for given distance (index), saving this object for later use
 	void generateparam(int index);
 
     // VUV arrival times calculation function
+    // returns an arrival time for each photon randomly drawn from the pre-sampled parameterisations 
     std::vector<double> getVUVTime(double distance, int number_photons);
 
-    // vis arrival times calculation function
+    // VIS arrival times calculation function
+    // returns an arrival time for each photon randomly drawn from the pre-sampled VUV parameterisations and smeared to approximate visible light distribution
     std::vector<double> getVisTime(TVector3 ScintPoint, TVector3 OpDetPoint, int number_photons);
 };
 
