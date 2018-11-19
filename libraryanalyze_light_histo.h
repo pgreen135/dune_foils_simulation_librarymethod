@@ -39,10 +39,10 @@ bool sort_function(std::pair<double, int> pair1, std::pair<double, int> pair2)
 ///-------------------------------------
 //--------WHAT to generate?-------------
 ///-------------------------------------
-bool fixed_energy = true; double fixedE = 20.0; //MeV
+bool fixed_energy = false; double fixedE = 20.0; //MeV
 bool supernova = false;
 bool solar = false;
-bool gen_argon = false;
+bool gen_argon = true;
 bool gen_radon = false;
 ///-------------------------------------
 ///-------------------------------------
@@ -59,7 +59,7 @@ bool fixed_xpos = false; 	// needs updating, range getting random position from 
 bool fixed_yz_pos = false;
 bool fixed_pos = false;	
 
-double PosMin[3] = {10.,-600,0.}; 	//For random_pos option, generate in this range
+double PosMin[3] = {10.,-658.,0.}; 	//For random_pos option, generate in this range
 double PosMax[3] = {363.,600,1400};
 // Middle of the detector
 double fixedX = (PosMax[0]+PosMin[0]) / 2; 	// cm 
@@ -99,7 +99,7 @@ bool reflT;
 //--------------------------------------
 //TTree branches and data products:
 //-------------------------------------
-TFile event_file("event_file_SN_tw2.5_centred.root", "RECREATE", "Event File");
+TFile event_file("../analysisWeek8/event_file_Ar39_tw2.5.root", "RECREATE", "Event File");
 
 TTree *data_tree = new TTree("data_tree", "data tree");
 TTree *data_tree_vuv = new TTree("data_tree_vuv", "data tree_vuv");
