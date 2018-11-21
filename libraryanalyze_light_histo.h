@@ -40,9 +40,9 @@ bool sort_function(std::pair<double, int> pair1, std::pair<double, int> pair2)
 //--------WHAT to generate?-------------
 ///-------------------------------------
 bool fixed_energy = false; double fixedE = 20.0; //MeV
-bool supernova = false;
+bool supernova = true;
 bool solar = false;
-bool gen_argon = true;
+bool gen_argon = false;
 bool gen_radon = false;
 ///-------------------------------------
 ///-------------------------------------
@@ -54,9 +54,9 @@ double step_size = 1.0; 	// step size for discretisation of timing array in cm
 //--------WHERE to generate?-------------
 ///-------------------------------------
 // Choose one only!
-bool random_pos = true;
+bool random_pos = false;
 bool fixed_xpos = false; 	// needs updating, range getting random position from is not valid for dune library
-bool fixed_yz_pos = false;
+bool fixed_yz_pos = true;
 bool fixed_pos = false;	
 
 double PosMin[3] = {10.,-658.,0.}; 	//For random_pos option, generate in this range
@@ -99,7 +99,7 @@ bool reflT;
 //--------------------------------------
 //TTree branches and data products:
 //-------------------------------------
-TFile event_file("../analysisWeek8/event_file_Ar39_tw2.5.root", "RECREATE", "Event File");
+TFile event_file("../analysisWeek8/event_file_SN_tw10_corrected.root", "RECREATE", "Event File");
 
 TTree *data_tree = new TTree("data_tree", "data tree");
 TTree *data_tree_vuv = new TTree("data_tree_vuv", "data tree_vuv");
@@ -174,7 +174,7 @@ const double Q_Rn = 5.590; 				// deposited energy from a radon decay - Rn-222 -
 //----TPC and PMT properties---------------------
 ///-------------------------------------
 // QE of Arapucas, mesh efficiency  + /0.46 to remove bar attenuation factor included in library
-const double quantum_efficiency = 0.01*0.7/0.46; 		
+const double quantum_efficiency = 0.025*0.7/0.46; 		
 const double catcov = 0.8; 	// proportion of cathode covered by TPB
 const double vuvfrac = 0.5;
 const double visfrac = (1-vuvfrac) + 0.8*vuvfrac; 	// rest of PMTs (1-vuvfrac) sensitive to vis light + account for TPB covered PMTs' ability to
@@ -182,7 +182,7 @@ const double visfrac = (1-vuvfrac) + 0.8*vuvfrac; 	// rest of PMTs (1-vuvfrac) s
 const double mass = 0.001396*(PosMax[0]-PosMin[0])*(PosMax[1]-PosMin[1])*(PosMax[2]-PosMin[2]); // density = 1.396 g/cm^3
 
 const double frame_time = 0.0025; // 2.5 miliseconds; equivalent to the drift time of electrons in DUNE
-const double time_window = 2.5; //readout window (running time of the simulation in seconds)
+const double time_window = 10; //readout window (running time of the simulation in seconds)
 const double time_frames = int(time_window/frame_time); // number of frames registered
 
 ///-------------------------------------
@@ -195,7 +195,7 @@ const int max_events_FE = 1000;
 
 // Ar-39 events:
 //const int max_events_Ar = 10;
-const int max_events_Ar = activity_Ar * mass * time_window;//Half volume for 1 TPC
+const int max_events_Ar = activity_Ar * mass * time_window;//FULL volume for 1 TPC
 const int Ar_decays_per_sec = activity_Ar* mass; // decay rate in one TPC
 
 // Radon events:
